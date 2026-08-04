@@ -1,0 +1,20 @@
+#include <stdio.h>
+int winningPlayerCount(int n, int** pick, int pickSize, int* pickColSize) {
+    int freq[10][11] = {0};
+    int winning_players = 0;
+    for (int i = 0; i < pickSize; i++) {
+        int player = pick[i][0];
+        int color = pick[i][1];
+        freq[player][color]++;
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j <= 10; j++) {
+            if (freq[i][j] >= i + 1) {
+                winning_players++;
+                break;
+            }
+        }
+    }
+
+    return winning_players;
+}
