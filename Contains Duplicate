@@ -1,0 +1,29 @@
+#include <stdbool.h>
+#include <stdlib.h>
+
+// Change the function name back to exactly what the compiler expects
+bool containsDuplicate(int* nums, int numsSize) {
+    int tableSize = numsSize * 2; 
+    int* hashTable = (int*)calloc(tableSize, sizeof(int));
+    bool* isOccupied = (bool*)calloc(tableSize, sizeof(bool));
+    
+    for (int i = 0; i < numsSize; i++) {
+        unsigned int hash = (unsigned int)nums[i] % tableSize;
+        
+        while (isOccupied[hash]) {
+            if (hashTable[hash] == nums[i]) {
+                free(hashTable);
+                free(isOccupied);
+                return true; 
+            }
+            hash = (hash + 1) % tableSize;
+        }
+        
+        hashTable[hash] = nums[i];
+        isOccupied[hash] = true;
+    }
+    
+    free(hashTable);
+    free(isOccupied);
+    return false;
+}
