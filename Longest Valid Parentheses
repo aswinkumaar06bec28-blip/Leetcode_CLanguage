@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Macros to mimic Java's Math.max
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+int longestValidParentheses(char* s) {
+    int n = strlen(s);
+    if (n == 0) return 0;
+
+    // Allocate array for the stack
+    int* stack = (int*)malloc((n + 1) * sizeof(int));
+    int top = -1;
+    int maxLength = 0;
+
+    // Push initial base index (-1)
+    stack[++top] = -1;
+
+    for (int i = 0; i < n; i++) {
+        if (s[i] == '(') {
+            stack[++top] = i; // Push index
+        } else {
+            top--; // Pop
+            if (top == -1) {
+                stack[++top] = i; // Push base index
+            } else {
+                maxLength = MAX(maxLength, i - stack[top]); // Peek top element
+            }
+        }
+    }
+
+    free(stack);
+    return maxLength;
+}
