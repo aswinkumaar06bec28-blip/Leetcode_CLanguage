@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int removeElement(int* nums, int numsSize, int val) {
+    int k = 0;
+    
+    for (int i = 0; i < numsSize; i++) {
+        // If the current element is not the target value
+        if (nums[i] != val) {
+            nums[k] = nums[i]; // Move it to the next available 'k' position
+            k++;
+        }
+    }
+    
+    return k; // Return the count of elements not equal to val
+}
