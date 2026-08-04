@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure for hash table entries
+typedef struct {
+    int key;
+    int value;
+} HashEntry;
+
+// Simple hash function using modulo (handling negative numbers)
+int hash(int key, int size) {
+    int h = key % size;
+    return h < 0 ? h + size : h;
+}
+
+// Function to find indices of the two numbers
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+    *returnSize = 2;
+    int* result = (int*)malloc(2 * sizeof(int));
+    
+    // Using a hash table with size proportional to numsSize (using twice the size to minimize collisions)
+    int hashSize = numsSize * 2;
+    HashEntry* hashTable = (HashEntry*)calloc(hashSize, sizeof(HashEntry));
+    
+    // Array to track if a hash bucket is occupied (0 = empty, 1 = occupied)
+    int* occupied = (int*)calloc(hashSize, sizeof(int));
+
+    for (int i = 0; i < numsSize; i++) {
+        int complement = target - nums[i];
+        int compHash = hash(complement, hashSize);
+
+        // Look for the complement in the hash table (handling linear probing collisions)
+        while (occupied[compHash]) {
+            if (hashTable[compHash].key == complement) {
+                result[0] = hashTable[compHash].value;
+                result[1] = i;
+                
+                free(hashTable);
+                free(occupied);
+                return result;
+            }
+            compHash = (compHash + 1) % hashSize;
+        }
+
+        // Insert current number into hash table if complement wasn't found
+        int currHash = hash(nums[i], hashSize);
+        while (occupied[currHash]) {
+            currHash = (currHash + 1) % hashSize;
+        }
+        hashTable[currHash].key = nums[i];
+        hashTable[currHash].value = i;
+        occupied[currHash] = 1;
+    }
+
+    // Free memory if no solution is found (though the problem guarantees one exists)
+    free(hashTable);
+    free(occupied);
+    return result;
+}
