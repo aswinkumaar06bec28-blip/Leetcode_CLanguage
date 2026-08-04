@@ -1,0 +1,30 @@
+#include <stdbool.h>
+#include <string.h>
+
+bool isAnagram(char* s, char* t) {
+    int len_s = strlen(s);
+    int len_t = strlen(t);
+    
+    // 1. If lengths match incorrectly, they cannot be anagrams
+    if (len_s != len_t) {
+        return false;
+    }
+    
+    // 2. Frequency array for 26 lowercase English letters
+    int count[26] = {0};
+    
+    // 3. Count frequencies in a single pass
+    for (int i = 0; i < len_s; i++) {
+        count[s[i] - 'a']++;
+        count[t[i] - 'a']--;
+    }
+    
+    // 4. Check if all frequencies are zero
+    for (int i = 0; i < 26; i++) {
+        if (count[i] != 0) {
+            return false;
+        }
+    }
+    
+    return true;
+}
