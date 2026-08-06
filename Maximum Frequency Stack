@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define HASH_SIZE 20011
+
+typedef struct HashNode {
+    int key;
+    int count;
+    struct HashNode* next;
+} HashNode;
+
+typedef struct StackNode {
+    int val;
+    struct StackNode* next;
+} StackNode;
+
+
+typedef struct {
+    HashNode* freqMap[HASH_SIZE]; 
+    StackNode** groupStacks;       
+    int maxFreq;                  
+    int groupCapacity;            
+} FreqStack;
+
+int getHash(int key) {
+    unsigned int hash = (unsigned int)key;
+    return hash % HASH_SIZE;
+}
+
+int updateFreq(FreqStack* obj, int key, int delta) {
+    int index = getHash(key);
+    HashNode* curr = obj->freqMap[index];
+    
+    while (curr != NULL) {
+        if (curr->key == key) {
+            curr->count += delta;
+            return curr->count;
+        }
+        curr = curr->next;
+    }
+    
+    HashNode* newNode = (HashNode*)malloc(sizeof(HashNode));
+    newNode->key = key;
+    newNode->count = 1;
+    newNode->next = obj->freqMap[index];
+    obj->freqMap[index] = newNode;
+    return 1;
+}
+
+void pushToGroup(FreqStack* obj, int freq, int val) {
+    if (freq >= obj->groupCapacity) {
+        int oldCapacity = obj->groupCapacity;
+        obj->groupCapacity *= 2;
+        obj->groupStacks = (StackNode**)realloc(obj->groupStacks, sizeof(StackNode*) * obj->groupCapacity);
+        for (int i = oldCapacity; i < obj->groupCapacity; i++) {
+            obj->groupStacks[i] = NULL;
+        }
+    }
+    
+    StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
+    newNode->val = val;
+    newNode->next = obj->groupStacks[freq];
+    obj->groupStacks[freq] = newNode;
+}
+
+int popFromGroup(FreqStack* obj, int freq) {
+    StackNode* topNode = obj->groupStacks[freq];
+    int val = topNode->val;
+    obj->groupStacks[freq] = topNode->next;
+    free(topNode);
+    return val;
+}
+
+
+FreqStack* freqStackCreate() {
+    FreqStack* obj = (FreqStack*)malloc(sizeof(FreqStack));
+    for (int i = 0; i < HASH_SIZE; i++) {
+        obj->freqMap[i] = NULL;
+    }
+    obj->maxFreq = 0;
+    obj->groupCapacity = 20005; 
+    obj->groupStacks = (StackNode**)calloc(obj->groupCapacity, sizeof(StackNode*));
+    return obj;
+}
+
+void freqStackPush(FreqStack* obj, int val) {
+    int freq = updateFreq(obj, val, 1);
+    if (freq > obj->maxFreq) {
+        obj->maxFreq = freq;
+    }
+    pushToGroup(obj, freq, val);
+}
+
+int freqStackPop(FreqStack* obj) {
+    int val = popFromGroup(obj, obj->maxFreq);
+    updateFreq(obj, val, -1);
+    if (obj->groupStacks[obj->maxFreq] == NULL) {
+        obj->maxFreq--;
+    }
+    return val;
+}
+
+void freqStackFree(FreqStack* obj) {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        HashNode* curr = obj->freqMap[i];
+        while (curr != NULL) {
+            HashNode* temp = curr;
+            curr = curr->next;
+            free(temp);
+        }
+    }
+    for (int i = 0; i < obj->groupCapacity; i++) {
+        StackNode* curr = obj->groupStacks[i];
+        while (curr != NULL) {
+            StackNode* temp = curr;
+            curr = curr->next;
+            free(temp);
+        }
+    }
+    free(obj->groupStacks);
+    free(obj);
+}
