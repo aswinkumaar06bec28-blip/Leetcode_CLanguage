@@ -1,0 +1,60 @@
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define MAX_SIZE 100
+
+typedef struct {
+    int data[MAX_SIZE];
+    int top;
+} Stack;
+
+void stackInit(Stack* s) {
+    s->top = -1;
+}
+void stackPush(Stack* s, int val) {
+    s->data[++(s->top)] = val;
+}
+int stackPop(Stack* s) {
+    return s->data[(s->top)--];
+}
+int stackPeek(Stack* s) {
+    return s->data[s->top];
+}
+bool stackIsEmpty(Stack* s) {
+    return s->top == -1;
+}
+
+typedef struct {
+    Stack input;
+    Stack output;
+} MyQueue;
+
+MyQueue* myQueueCreate() {
+    MyQueue* queue = (MyQueue*)malloc(sizeof(MyQueue));
+    stackInit(&(queue->input));
+    stackInit(&(queue->output));
+    return queue;
+}
+void myQueuePush(MyQueue* obj, int x) {
+    stackPush(&(obj->input), x);
+}
+int myQueuePeek(MyQueue* obj) {
+    if (stackIsEmpty(&(obj->output))) {
+        while (!stackIsEmpty(&(obj->input))) {
+            stackPush(&(obj->output), stackPop(&(obj->input)));
+        }
+    }
+    return stackPeek(&(obj->output));
+}
+int myQueuePop(MyQueue* obj) {
+    myQueuePeek(obj);
+    return stackPop(&(obj->output));
+}
+
+bool myQueueEmpty(MyQueue* obj) {
+    return stackIsEmpty(&(obj->input)) && stackIsEmpty(&(obj->output));
+}
+void myQueueFree(MyQueue* obj) {
+    free(obj);
+}
+        
