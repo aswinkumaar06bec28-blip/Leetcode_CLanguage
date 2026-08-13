@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int compareChars(const void* a, const void* b) {
+    return (*(char*)a - *(char*)b);
+}
+
+char* orderlyQueue(char* s, int k) {
+    int len = strlen(s);
+    char* result = (char*)malloc((len + 1) * sizeof(char));
+    if (k > 1) {
+        strcpy(result, s);
+        qsort(result, len, sizeof(char), compareChars);
+        return result;
+    }
+    strcpy(result, s); 
+    char* temp = (char*)malloc((len + 1) * sizeof(char));
+    
+    for (int i = 1; i < len; i++) {
+        strncpy(temp, s + i, len - i);
+        strncpy(temp + (len - i), s, i);
+        temp[len] = '\0';
+        if (strcmp(temp, result) < 0) {
+            strcpy(result, temp);
+        }
+    }
+    
+    free(temp);
+    return result;
+}
