@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define ALPHABET_SIZE 27
+
+typedef struct TrieNode {
+    int weight;
+    struct TrieNode* children[ALPHABET_SIZE];
+} TrieNode;
+
+typedef struct {
+    TrieNode* root;
+} WordFilter;
+
+TrieNode* createNode() {
+    TrieNode* node = (TrieNode*)malloc(sizeof(TrieNode));
+    node->weight = -1;
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        node->children[i] = NULL;
+    }
+    return node;
+}
+
+void insert(TrieNode* root, const char* key, int weight) {
+    TrieNode* curr = root;
+    for (int i = 0; key[i] != '\0'; i++) {
+        int index = key[i] - 'a'; 
+        if (!curr->children[index]) {
+            curr->children[index] = createNode();
+        }
+        curr = curr->children[index];
+        curr->weight = weight; 
+    }
+}
+
+WordFilter* wordFilterCreate(char** words, int wordsSize) {
+    WordFilter* filter = (WordFilter*)malloc(sizeof(WordFilter));
+    filter->root = createNode();
+
+    char combined[20]; 
+
+    for (int i = 0; i < wordsSize; i++) {
+        int len = strlen(words[i]);
+        for (int j = 0; j <= len; j++) {
+            int pos = 0;
+            for (int k = j; k < len; k++) {
+                combined[pos++] = words[i][k];
+            }
+            combined[pos++] = '{';
+            for (int k = 0; k < len; k++) {
+                combined[pos++] = words[i][k];
+            }
+            combined[pos] = '\0';
+
+            insert(filter->root, combined, i);
+        }
+    }
+    return filter;
+}
+
+int wordFilterF(WordFilter* obj, char* pref, char* suff) {
+    TrieNode* curr = obj->root;
+    
+    for (int i = 0; suff[i] != '\0'; i++) {
+        int index = suff[i] - 'a';
+        if (!curr->children[index]) return -1;
+        curr = curr->children[index];
+    }
+    
+    int delimiterIndex = '{' - 'a';
+    if (!curr->children[delimiterIndex]) return -1;
+    curr = curr->children[delimiterIndex];
+    
+    for (int i = 0; pref[i] != '\0'; i++) {
+        int index = pref[i] - 'a';
+        if (!curr->children[index]) return -1;
+        curr = curr->children[index];
+    }
+    
+    return curr->weight;
+}
+
+void freeTrie(TrieNode* root) {
+    if (!root) return;
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        if (root->children[i]) {
+            freeTrie(root->children[i]);
+        }
+    }
+    free(root);
+}
+
+void wordFilterFree(WordFilter* obj) {
+    if (obj) {
+        freeTrie(obj->root);
+        free(obj);
+    }
+}
