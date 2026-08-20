@@ -1,0 +1,51 @@
+
+struct TreeNode* createNode(int val) {
+    struct TreeNode* node = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    node->val = val;
+    node->left = NULL;
+    node->right = NULL;
+    return node;
+}
+
+struct TreeNode** buildTrees(int start, int end, int* returnSize) {
+    if (start > end) {
+        *returnSize = 1;
+        struct TreeNode** result = (struct TreeNode**)malloc(sizeof(struct TreeNode*));
+        result[0] = NULL;
+        return result;
+    }
+
+    int totalCount = 0;
+    struct TreeNode** resultList = (struct TreeNode**)malloc(2000 * sizeof(struct TreeNode*));
+
+    for (int i = start; i <= end; i++) {
+        int leftSize = 0;
+        int rightSize = 0;
+
+        struct TreeNode** leftSubtrees = buildTrees(start, i - 1, &leftSize);
+        struct TreeNode** rightSubtrees = buildTrees(i + 1, end, &rightSize);
+
+        for (int l = 0; l < leftSize; l++) {
+            for (int r = 0; r < rightSize; r++) {
+                struct TreeNode* root = createNode(i);
+                root->left = leftSubtrees[l];
+                root->right = rightSubtrees[r];
+                resultList[totalCount++] = root;
+            }
+        }
+        
+        free(leftSubtrees);
+        free(rightSubtrees);
+    }
+
+    *returnSize = totalCount;
+    return resultList;
+}
+
+struct TreeNode** generateTrees(int n, int* returnSize) {
+    if (n == 0) {
+        *returnSize = 0;
+        return NULL;
+    }
+    return buildTrees(1, n, returnSize);
+}
