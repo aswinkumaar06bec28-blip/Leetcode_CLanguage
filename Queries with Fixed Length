@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+// Function to solve a single query of window size d
+int solveQuery(int n, int* arr, int d) {
+    // Array to act as a double-ended queue (deque) storing indices
+    int* deque = (int*)malloc(sizeof(int) * n);
+    int front = 0;
+    int rear = 0;
+    
+    int min_of_maxes = INT_MAX;
+
+    for (int i = 0; i < n; i++) {
+        // 1. Remove indices that are out of the current window frame
+        if (front < rear && deque[front] <= i - d) {
+            front++;
+        }
+
+        // 2. Remove elements from the back that are smaller than the current element
+        while (front < rear && arr[deque[rear - 1]] <= arr[i]) {
+            rear--;
+        }
+
+        // 3. Insert the current element's index
+        deque[rear++] = i;
+
+        // 4. Once a complete window of size d is formed, record the maximum
+        if (i >= d - 1) {
+            int current_max = arr[deque[front]];
+            if (current_max < min_of_maxes) {
+                min_of_maxes = current_max;
+            }
+        }
+    }
+
+    free(deque);
+    return min_of_maxes;
+}
+
+int main() {
+    int n, q;
+    if (scanf("%d %d", &n, &q) != 2) return 0;
+
+    int* arr = (int*)malloc(sizeof(int) * n);
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &arr[i]) != 1) return 0;
+    }
+
+    // Process each query frame sequentially
+    for (int i = 0; i < q; i++) {
+        int d;
+        if (scanf("%d", &d) != 1) return 0;
+        
+        int result = solveQuery(n, arr, d);
+        printf("%d\n", result);
+    }
+
+    free(arr);
+    return 0;
+}
