@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to calculate the largest rectangle
+long largestRectangle(int h_count, int* h) {
+    int* stack = (int*)malloc(sizeof(int) * (h_count + 1));
+    int top = -1;
+    long max_area = 0;
+    int i = 0;
+
+    while (i < h_count) {
+        if (top == -1 || h[i] >= h[stack[top]]) {
+            stack[++top] = i++;
+        } else {
+            int popped_index = stack[top--];
+            long height = h[popped_index];
+            long width = (top == -1) ? i : (i - stack[top] - 1);
+            long area = height * width;
+            if (area > max_area) {
+                max_area = area;
+            }
+        }
+    }
+
+    while (top != -1) {
+        int popped_index = stack[top--];
+        long height = h[popped_index];
+        long width = (top == -1) ? i : (i - stack[top] - 1);
+        long area = height * width;
+        if (area > max_area) {
+            max_area = area;
+        }
+    }
+
+    free(stack);
+    return max_area;
+}
+
+int main() {
+    int n;
+    if (scanf("%d", &n) != 1) return 1;
+
+    int* h = (int*)malloc(sizeof(int) * n);
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &h[i]) != 1) return 1;
+    }
+
+    long result = largestRectangle(n, h);
+    printf("%ld\n", result);
+
+    free(h);
+    return 0;
+}
